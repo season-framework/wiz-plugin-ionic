@@ -4,6 +4,8 @@
 
 - explore에서 Install, add 버튼들 모달로 숨겨버리기
   - 열 때마다 api 콜해서 정신사나움
+  - 아니면 toolkit 형태로 ui 컴포넌트 따로 만들어서 우측 하단으로 위치시키기
+  - electron plugin도 이러면 될 듯
 
 ## Precondition
 
