@@ -41,15 +41,27 @@ class Model:
         if fs.exists("src/angular/capacitor.config.ts") == False:
             fs.write("src/angular/capacitor.config.ts", Code.CAPACITOR)
 
-        Util.execute(f"cd {build_dir} && npm install @capacitor/android @capacitor/app @capacitor/core @capacitor/haptics @capacitor/keyboard @capacitor/status-bar @ionic/angular ionicons --save")
+        Util.execute(f"cd {build_dir} && npm install @capacitor/app @capacitor/core @capacitor/haptics @capacitor/keyboard @capacitor/status-bar @ionic/angular ionicons --save")
         Util.execute(f"cd {build_dir} && npm install -D @capacitor/cli @ionic/angular-toolkit")
         Util.execute(f"cd {build_dir} && ionic cap add android")
 
         packageJson = fs.read.json("build/package.json")
         if "scripts" not in packageJson: packageJson["scripts"] = dict()
-        # packageJson["scripts"]["ionic"] = "cap run android --target=[YOUR_ANDROID_STRING] --external"
         packageJson["scripts"]["ionic:android"] = "cap run android --external"
+        packageJson["scripts"]["ionic:ios"] = "cap run ios --external"
         fs.write.json("build/package.json", packageJson)
+
+    def install_android(self):
+        fs = self.fs()
+        fs.remove("build/android")
+        build_dir = fs.abspath("build")
+        Util.execute(f"cd {build_dir} && npm install @capacitor/android --save && npx cap add android")
+
+    def install_ios(self):
+        fs = self.fs()
+        fs.remove("build/ios")
+        build_dir = fs.abspath("build")
+        Util.execute(f"cd {build_dir} && npm install @capacitor/ios --save && npx cap add ios")
 
     def __call__(self):
         self.build()

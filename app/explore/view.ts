@@ -14,6 +14,8 @@ export class Component implements OnInit {
             await this.service.render(100);
         this.current = this.treeConfig.rootNode();
         this.service.event.bind(this.APP_ID, this);
+        await this.getStatus();
+        await this.getDevices();
     }
 
     public getMod(path: string) {
@@ -337,9 +339,81 @@ export class Component implements OnInit {
         await this.service.render();
     }
 
-    public appStart() {
-        // wiz.call("ionic_start");
-        wiz.call("android_devices");
+    public devices = [];
+    public device = "";
+    public async getDevices() {
+        const { code, data } = await wiz.call("devices");
+        if (code !== 200) return;
+        this.devices = data;
+        if (this.device === "" && data.length > 0) this.device = this.devices[0].id;
+        await this.service.render();
+    }
+
+    public status = this.emptyStatus();
+    private emptyStatus() {
+        return {
+            android: false,
+            ios: false,
+            java: false,
+            adb: false,
+            java_home: false,
+            android_home: false,
+            idevice: false,
+            pod: false,
+        };
+    }
+    public async getStatus() {
+        const { code, data } = await wiz.call("cap_status");
+        if (code !== 200) {
+            this.status = this.emptyStatus();
+            return;
+        }
+        this.status = data;
+        await this.service.render();
+    }
+
+    public showAddAndroid() {
+        const { android } = this.status;
+        if (android) return false;
+        return true;
+    }
+
+    public disabledAddAndroid() {
+        const { java, adb, java_home, android_home } = this.status;
+        if (java && adb && java_home && android_home) return false;
+        return true;
+    }
+
+    public showAddIOS() {
+        const { ios } = this.status;
+        if (ios) return false;
+        return true;
+    }
+
+    public disabledAddIOS() {
+        const { idevice, pod } = this.status;
+        if (idevice && pod) return false;
+        return true;
+    }
+
+    public async appInstall() {
+        if (this.device === "") return;
+        const body = this.devices.find(it => it.id === this.device);
+        await this.loader(true);
+        await wiz.call("ionic_start", body);
+        await this.loader(false);
+    }
+
+    public async addAndroid() {
+        await this.loader(true);
+        await wiz.call("add_android");
+        await this.loader(false);
+    }
+
+    public async addIOS() {
+        await this.loader(true);
+        await wiz.call("add_ios");
+        await this.loader(false);
     }
 
     public async rebuild() {

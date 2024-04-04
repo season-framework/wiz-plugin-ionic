@@ -268,34 +268,98 @@ def build(segment):
     builder.build()
     wiz.response.status(200)
 
+def __execute__(cmd):
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if out is not None and len(out) > 0:
+        out = out.decode('utf-8').strip()
+    return out, err
+
 def ionic_start():
-    device_id = wiz.request.query("device_id", True)
+    type = wiz.request.query("type", True)
+    device_id = wiz.request.query("id", True)
     util = wiz.ide.plugin.model("src/util")
     execute = util.execute
     buildpath = fs.abspath("build")
-    proc = execute(f"cd {buildpath} && npm run ionic --target={device_id}")
+    proc = execute(f"cd {buildpath} && npm run ionic:{type} --target={device_id}")
     wiz.response.status(200)
 
-def android_devices():
+def devices():
     os_name = platform.system()
     if os_name == "Windows":
         wiz.response.status(500)
 
-    cmd = """adb devices | awk '{ if ($2 == "device") print $1 }'"""
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    if out is None: wiz.response.status(500)
-    if len(out) == 0: wiz.response.status(500)    
-
-    out = out.decode('utf-8').strip()
-    devices = out.split("\n")
     res = []
-    for device in devices:
-        d = device.strip()
-        if len(d) == 0: continue
-        res.append(d)
+    # android
+    cmd = """adb devices | awk '{ if ($2 == "device") print $1 }'"""
+    out, err = __execute__(cmd)
+    if out is not None and len(out) > 0:
+        devices = out.split("\n")
+        for device in devices:
+            d = device.strip()
+            if len(d) == 0: continue
+            res.append(dict(id=d, type="android"))
+
+    # ios
+    cmd = "idevice_id -l"
+    out, err = __execute__(cmd)
+    if out is not None and len(out) > 0:
+        devices = out.split("\n")
+        for device in devices:
+            d = device.strip()
+            if len(d) == 0: continue
+            res.append(dict(id=d, type="ios"))
+    wiz.response.status(200, res)
+
+def cap_status():
+    res = dict(
+        android=False,
+        ios=False,
+        java=False,
+        adb=False,
+        java_home=False,
+        android_home=False,
+        idevice=False,
+        pod=False,
+    )
+    if fs.exists("build/android/build.gradle"):
+        res["android"] = True
+    if fs.exists("build/ios/App/Podfile"):
+        res["ios"] = True
+
+    out, err = __execute__("java -version 2>&1 | head -n 1 | awk '{ print $3 }'")
+    if out is not None and len(out) > 0:
+        res["java"] = out
+    
+    out, err = __execute__("adb --version 2>&1 | head -n 1 | awk '{ print $5 }'")
+    if out is not None and len(out) > 0:
+        res["adb"] = out
+
+    out, err = __execute__("echo $JAVA_HOME")
+    if out is not None and len(out) > 0:
+        res["java_home"] = out
+
+    out, err = __execute__("echo $ANDROID_HOME")
+    if out is not None and len(out) > 0:
+        res["android_home"] = out
+
+    out, err = __execute__("idevice_id --version | awk '{print $2}'")
+    if out is not None and len(out) > 0:
+        res["idevice"] = out
+    
+    out, err = __execute__("pod --version")
+    if out is not None and len(out) > 0:
+        res["pod"] = out
 
     wiz.response.status(200, res)
+
+def add_android():
+    builder.install_android()
+    wiz.response.status(200)
+
+def add_ios():
+    builder.install_ios()
+    wiz.response.status(200)
 
 def rebuild():
     builder.clean()

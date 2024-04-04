@@ -38,9 +38,18 @@
                                     input.form-control.form-control-sm([(ngModel)]="data.newItem.title", placeholder="파일명", (keyup.enter)="requestCreateFile(data)")
                                 i.icon-action-always.fa-solid.fa-xmark((click)="cancelCreate(data); $event.stopPropagation();")
                                 i.icon-action-always.fa-solid.fa-check((click)="requestCreateFile(data); $event.stopPropagation();")
-        button.btn.btn-block.btn-primary.mt-4((click)="appStart()") Install in Android
+        .d-flex.mt-4
+            select.form-select([(ngModel)]="device")
+                option(*ngIf="devices.length == 0", value="") No device 
+                option(*ngFor="let device of devices;let i = index", [value]="device.id") [{{device.type}}] {{device.id}}
+            button.btn.btn-outline-dark.ml-2.px-2((click)="getDevices()")
+                i.fa-solid.fa-arrows-rotate
         .d-flex.mt-2
-            button.btn.btn-sm.btn-outline-danger.ml-auto((click)="rebuild()") rebuild
+            button.btn.btn-block.btn-primary((click)="appInstall()", [disabled]="!device") Install
+        .d-flex.mt-2
+            button.btn.btn-sm.btn-outline-success.ml-auto(*ngIf="showAddAndroid()", [disabled]="disabledAddAndroid()", (click)="addAndroid()") Add Android
+            button.btn.btn-sm.btn-outline-dark.ml-2(*ngIf="showAddIOS()", [disabled]="disabledAddIOS()", (click)="addIOS()") Add iOS
+            button.btn.btn-sm.btn-outline-danger.ml-2((click)="rebuild()") rebuild
     .progress(*ngIf="uploadStatus.uploading")
         .progress-bar.bg-blue(style="width: {{uploadStatus.percent}}%;")
     
