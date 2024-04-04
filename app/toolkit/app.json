@@ -1,0 +1,7 @@
+{
+    "id": "toolkit",
+    "title": "Toolkit",
+    "category": "",
+    "description": "ionic all-in-one toolkit",
+    "template": "wiz-ionic-app-toolkit()"
+}

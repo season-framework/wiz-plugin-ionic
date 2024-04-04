@@ -36,13 +36,26 @@ in PATH variable
 
 1. 우측 하단 System Setting > IDE Menu에 아래 내용 추가
 
+> main
+
 ```json
 {
     "name": "Ionic Explore",
     "id": "ionic.app.explore",
     "icon": "fa-solid fa-mobile-screen",
     "width": 240
-},
+}
+```
+
+> sub
+
+```json
+{
+    "name": "Ionic Toolkit",
+    "id": "ionic.app.toolkit",
+    "icon": "fa-solid fa-mobile-screen",
+    "width": 300
+}
 ```
 
 2. Ionic Explore > rebuild 실행
