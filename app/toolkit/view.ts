@@ -8,8 +8,7 @@ export class Component implements OnInit {
 
     public async ngOnInit() {
         await this.loader(true);
-        await this.getStatus();
-        await this.getDevices();
+        await this.getInstalled();
         await this.loader(false);
     }
 
@@ -29,6 +28,11 @@ export class Component implements OnInit {
     }
 
     public status = this.emptyStatus();
+    public hide = {
+        android: true,
+        ios: true,
+    };
+
     private emptyStatus() {
         return {
             android: false,
@@ -41,13 +45,29 @@ export class Component implements OnInit {
             pod: false,
         };
     }
-    public async getStatus() {
-        const { code, data } = await wiz.call("cap_status");
-        if (code !== 200) {
-            this.status = this.emptyStatus();
-            return;
-        }
-        this.status = data;
+
+    public async getInstalled() {
+        const { code, data } = await wiz.call("installed");
+        if (code !== 200) return;
+        this.status = {
+            ...this.status,
+            ...data,
+        };
+    }
+
+    public async getStatus(type) {
+        const { code, data } = await wiz.call(`${type}_status`);
+        if (code !== 200) return;
+        this.status = {
+            ...this.status,
+            ...data,
+        };
+        await this.service.render();
+    }
+
+    public async showStatus(type) {
+        await this.getStatus(type);
+        this.hide[type] = false;
         await this.service.render();
     }
 
@@ -73,6 +93,15 @@ export class Component implements OnInit {
         const { idevice, pod } = this.status;
         if (idevice && pod) return false;
         return true;
+    }
+
+    public disabledInstall() {
+        if (!this.device) return true;
+        if (this.device === "") return true;
+        const device = this.devices.find(it => it.id === this.device);
+        if (device.type === "android" && this.disabledAddAndroid()) return true;
+        if (device.type === "ios" && this.disabledAddIOS()) return true;
+        return false;
     }
 
     public async appInstall() {

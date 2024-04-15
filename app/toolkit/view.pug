@@ -7,34 +7,40 @@
     .side-body
         .d-flex
             h3.m-0 Android
-        .d-flex.mt-2
-            label.mr-2 Installed
-            strong {{status.android}}
-        .d-flex.mt-2
-            label.mr-2 JAVA
-            strong {{status.java}}
-        .d-flex.mt-2
-            label.mr-2 adb
-            strong {{status.adb}}
-        .d-flex.mt-2.flex-column
-            label.mr-2 JAVA_HOME
-            strong(style="word-break: break-all;") {{status.java_home}}
-        .d-flex.mt-2.flex-column
-            label.mr-2 ANDROID_HOME
-            strong(style="word-break: break-all;") {{status.android_home}}
-        hr.my-0
+        .d-flex.mt-2(*ngIf="hide.android")
+            button.btn.btn-block.btn-outline-dark((click)="showStatus('android')") GET ANDROID INFO
+        ng-container(*ngIf="!hide.android")
+            .d-flex.mt-2
+                label.mr-2 Installed
+                strong {{status.android}}
+            .d-flex.mt-2
+                label.mr-2 JAVA
+                strong {{status.java}}
+            .d-flex.mt-2
+                label.mr-2 adb
+                strong {{status.adb}}
+            .d-flex.mt-2.flex-column
+                label.mr-2 JAVA_HOME
+                strong(style="word-break: break-all;") {{status.java_home}}
+            .d-flex.mt-2.flex-column
+                label.mr-2 ANDROID_HOME
+                strong(style="word-break: break-all;") {{status.android_home}}
+        hr.mb-0.mt-2
         .d-flex.mt-4
             h3.m-0 iOS
-        .d-flex.mt-2
-            label.mr-2 Installed
-            strong {{status.ios}}
-        .d-flex.mt-2
-            label.mr-2 idevice
-            strong {{status.idevice}}
-        .d-flex.mt-2
-            label.mr-2 cocoapods
-            strong {{status.pod}}
-        hr.my-0
+        .d-flex.mt-2(*ngIf="hide.ios")
+            button.btn.btn-block.btn-outline-dark((click)="showStatus('ios')") GET IOS INFO
+        ng-container(*ngIf="!hide.ios")
+            .d-flex.mt-2
+                label.mr-2 Installed
+                strong {{status.ios}}
+            .d-flex.mt-2
+                label.mr-2 idevice
+                strong {{status.idevice}}
+            .d-flex.mt-2
+                label.mr-2 cocoapods
+                strong {{status.pod}}
+        hr.mb-0.mt-2
         .d-flex.mt-4
             select.form-select([(ngModel)]="device")
                 option(*ngIf="devices.length == 0", value="") No device 
@@ -42,7 +48,7 @@
             button.btn.btn-outline-dark.ml-2.px-2((click)="getDevices()")
                 i.fa-solid.fa-arrows-rotate
         .d-flex.mt-2
-            button.btn.btn-block.btn-primary((click)="appInstall()", [disabled]="!device") Install
+            button.btn.btn-block.btn-primary((click)="appInstall()", [disabled]="disabledInstall()") Install
         .d-flex.mt-2
             .ml-auto
             button.btn.btn-sm.btn-outline-success.ml-2(*ngIf="showAddAndroid()", [disabled]="disabledAddAndroid()", (click)="addAndroid()") Add Android

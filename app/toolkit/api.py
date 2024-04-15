@@ -47,21 +47,22 @@ def devices():
             res.append(dict(id=d, type="ios"))
     wiz.response.status(200, res)
 
-def cap_status():
+def installed():
+    res = dict()
+    exists = fs.exists("build/android/build.gradle")
+    res["android"] = exists
+    exists = fs.exists("build/ios/App/Podfile")
+    res["ios"] = exists
+    
+    wiz.response.status(200, res)
+
+def android_status():
     res = dict(
-        android=False,
-        ios=False,
         java=False,
         adb=False,
         java_home=False,
         android_home=False,
-        idevice=False,
-        pod=False,
     )
-    if fs.exists("build/android/build.gradle"):
-        res["android"] = True
-    if fs.exists("build/ios/App/Podfile"):
-        res["ios"] = True
 
     out, err = __execute__("java -version 2>&1 | head -n 1 | awk '{ print $3 }'")
     if out is not None and len(out) > 0:
@@ -78,6 +79,14 @@ def cap_status():
     out, err = __execute__("echo $ANDROID_HOME")
     if out is not None and len(out) > 0:
         res["android_home"] = out
+
+    wiz.response.status(200, res)
+
+def ios_status():
+    res = dict(
+        idevice=False,
+        pod=False,
+    )
 
     out, err = __execute__("idevice_id --version | awk '{print $2}'")
     if out is not None and len(out) > 0:
