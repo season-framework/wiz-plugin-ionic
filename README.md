@@ -15,7 +15,7 @@ in PATH variable
 
 ### iOS
 
-> 현재 검증 불가; Signing & Capabilities 에러가 발생하는데 xcode에서도 해결이 안됨. 이 거지같은 iOS 진짜...
+> 현재 검증 불가; Signing & Capabilities 에러가 발생;
 
 ```
 error: No profiles for 'io.ionic.starter' were found:
